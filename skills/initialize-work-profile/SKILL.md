@@ -19,7 +19,7 @@ python3 <plugin-root>/scripts/workbench.py init-profile \
   --activate
 ```
 
-5. Verify that `learning_mode` is `off`, session allowlists are empty, the profile directory is private, and the generated personal Skill uses a hyphenated technical name.
+5. Verify that `learning_mode` is `off`, session allowlists and team attachments are empty, the profile directory is private, and the generated personal Skill uses a hyphenated technical name.
 6. Explain that the display name may contain an underscore while Codex Skill names use lowercase hyphen-case.
 
 Read [references/profile-schema.md](references/profile-schema.md) before changing the schema or recovering a partially created profile.
@@ -30,4 +30,5 @@ Read [references/profile-schema.md](references/profile-schema.md) before changin
 - Do not infer ownership from the current directory, timestamps, conversation claims, or the display name.
 - Do not enable learning during initialization.
 - Do not register local modules without explicit user approval.
+- Do not attach a team pack merely because it is readable; confirm the user is authorized and wants that exact team snapshot.
 - Never add the private root to Git, a plugin archive, or a public report.

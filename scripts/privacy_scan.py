@@ -75,7 +75,16 @@ def git_files(root: Path) -> list[Path] | None:
     if Path(result.stdout.strip()).resolve() != root:
         return None
     listed = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z"],
+        [
+            "git",
+            "-C",
+            str(root),
+            "ls-files",
+            "-z",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
@@ -101,7 +110,7 @@ def public_files(root: Path) -> list[Path]:
     return result
 
 
-def scan(root: Path) -> list[tuple[str, str, Path, int]]:
+def scan(root: Path, policy: str = "public") -> list[tuple[str, str, Path, int]]:
     findings = []
     for path in public_files(root):
         if any(part in EXCLUDED_PARTS for part in path.relative_to(root).parts):
@@ -117,6 +126,8 @@ def scan(root: Path) -> list[tuple[str, str, Path, int]]:
             if "privacy-scan: allow" in line:
                 continue
             for name, severity, pattern in PATTERNS:
+                if policy == "team" and name == "absolute-user-path":
+                    continue
                 if pattern.search(line):
                     findings.append(
                         (severity, name, path.relative_to(root), line_number)
@@ -127,9 +138,15 @@ def scan(root: Path) -> list[tuple[str, str, Path, int]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", nargs="?", default=".")
+    parser.add_argument(
+        "--policy",
+        choices=("public", "team"),
+        default="public",
+        help="public blocks internal paths; team allows paths but still blocks secrets and personal records",
+    )
     args = parser.parse_args()
     root = Path(args.root).expanduser().resolve()
-    findings = scan(root)
+    findings = scan(root, policy=args.policy)
     for severity, name, path, line in findings:
         print(f"{severity}: {name}: {path}:{line}")
     if findings:

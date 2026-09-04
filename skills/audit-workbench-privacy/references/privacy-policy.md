@@ -10,3 +10,5 @@ Before publishing, manually ask:
 4. Are paths relative or placeholder-based?
 5. Did any candidate text become executable instructions without human review and tests?
 6. Does `git status` contain only intended public files?
+
+For an internal team pack, paths and non-secret operational locations are expected. Still reject credentials, personal records, raw sessions, customer data, and any material the whole authorized team should not receive. Passing the team scan does not make a pack safe for public release.

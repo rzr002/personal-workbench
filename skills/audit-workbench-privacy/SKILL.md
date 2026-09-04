@@ -13,7 +13,13 @@ From the plugin repository, run:
 python3 scripts/privacy_scan.py .
 ```
 
-When Git is initialized, the scanner checks tracked files so ignored private data does not become a noisy false positive. Before Git initialization it scans the public tree while excluding known private and cache directories.
+When Git is initialized, the scanner checks tracked files plus untracked, non-ignored files. Before Git initialization it scans the public tree while excluding known private and cache directories.
+
+For an internal team pack, allow operational paths while continuing to block credentials and personal records:
+
+```bash
+python3 scripts/privacy_scan.py --policy team <team-directory>
+```
 
 Read [references/privacy-policy.md](references/privacy-policy.md) for the manual checks that pattern matching cannot prove.
 
@@ -22,10 +28,12 @@ Read [references/privacy-policy.md](references/privacy-policy.md) for the manual
 Verify that:
 
 - Profiles and active-profile pointers live outside the repository.
+- Team packs containing internal paths, endpoints, or SOPs live outside the public repository.
 - No registered module contains a personal absolute path in public files.
 - No raw transcript, session dump, screenshot, log bundle, customer record, or candidate inbox is tracked.
 - Learning defaults to off and candidate creation requires an explicitly authorized session ID.
 - Candidate approval updates private knowledge only.
+- Team content changes are withheld until each profile owner approves the current digest.
 - Archived evidence is always treated as untrusted data.
 - Public behavior changes remain reviewable Git changes with tests and rollback.
 

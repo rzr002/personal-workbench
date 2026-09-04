@@ -143,6 +143,137 @@ class WorkbenchCliTest(unittest.TestCase):
             modules = json.loads((profile / "modules.json").read_text())["modules"]
             self.assertEqual("local-module", modules[0]["name"])
 
+    def test_team_pack_requires_approval_after_content_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root = base / "private"
+            team_root = base / "shared-team"
+            self.run_cli(
+                "init-profile",
+                "--name",
+                "owner",
+                "--root",
+                str(root),
+                "--activate",
+            )
+            self.run_cli(
+                "init-team",
+                "--name",
+                "Example team",
+                "--path",
+                str(team_root),
+            )
+            shared_skill = team_root / "skills" / "shared-ops"
+            shared_skill.mkdir(parents=True)
+            skill_file = shared_skill / "SKILL.md"
+            skill_file.write_text(
+                "---\nname: shared-ops\ndescription: Shared operations.\n---\n"
+            )
+            contract = team_root / "docs" / "contract.md"
+            contract.parent.mkdir()
+            contract.write_text("Version one.\n")
+            self.run_cli(
+                "add-team-module",
+                "--team",
+                str(team_root),
+                "--name",
+                "Shared ops",
+                "--skill-path",
+                str(shared_skill),
+                "--description",
+                "A team-owned module",
+                "--trigger",
+                "shared work",
+                "--resource-path",
+                str(contract),
+            )
+            self.run_cli(
+                "add-module",
+                "--root",
+                str(root),
+                "--name",
+                "Shared ops",
+                "--skill-path",
+                str(shared_skill),
+                "--description",
+                "An existing personal registration",
+            )
+            self.run_cli(
+                "attach-team",
+                "--root",
+                str(root),
+                "--team",
+                str(team_root),
+                expected=2,
+            )
+            self.run_cli(
+                "attach-team",
+                "--root",
+                str(root),
+                "--team",
+                str(team_root),
+                "--replace-personal",
+            )
+
+            resolved = json.loads(
+                self.run_cli("list-modules", "--root", str(root)).stdout
+            )
+            self.assertEqual([], resolved["blocked_teams"])
+            self.assertEqual("team", resolved["modules"][0]["scope"])
+            self.assertEqual("example-team", resolved["modules"][0]["team"])
+            personal_modules = json.loads(
+                (root / "profiles" / "owner" / "modules.json").read_text()
+            )["modules"]
+            self.assertEqual([], personal_modules)
+
+            contract.write_text("Version two.\n")
+            blocked = json.loads(
+                self.run_cli("list-modules", "--root", str(root)).stdout
+            )
+            self.assertEqual([], blocked["modules"])
+            self.assertEqual(
+                "approval-required", blocked["blocked_teams"][0]["status"]
+            )
+            status = json.loads(self.run_cli("status", "--root", str(root)).stdout)
+            self.assertEqual(1, status["pending_team_update_count"])
+
+            team_state = json.loads(
+                self.run_cli("list-teams", "--root", str(root)).stdout
+            )[0]
+            self.run_cli(
+                "approve-team-update",
+                "--root",
+                str(root),
+                "--team",
+                "example-team",
+                "--digest",
+                "0" * 64,
+                expected=2,
+            )
+            self.run_cli(
+                "approve-team-update",
+                "--root",
+                str(root),
+                "--team",
+                "example-team",
+                "--digest",
+                team_state["current_digest"],
+            )
+            approved = json.loads(
+                self.run_cli("list-modules", "--root", str(root)).stdout
+            )
+            self.assertEqual([], approved["blocked_teams"])
+            self.assertEqual("shared-ops", approved["modules"][0]["name"])
+
+            skill_file.write_text(skill_file.read_text() + "\nUpdated guidance.\n")
+            changed_skill = json.loads(
+                self.run_cli("list-modules", "--root", str(root)).stdout
+            )
+            self.assertEqual([], changed_skill["modules"])
+            self.assertEqual(
+                "approval-required", changed_skill["blocked_teams"][0]["status"]
+            )
+
 
 class PrivacyScanTest(unittest.TestCase):
     def test_detects_assigned_secret(self) -> None:
@@ -158,6 +289,41 @@ class PrivacyScanTest(unittest.TestCase):
                 [sys.executable, str(PRIVACY_SCAN), str(root)], check=False
             )
             self.assertEqual(1, failed.returncode)
+
+    def test_team_policy_allows_internal_paths_but_not_secrets(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "team.json"
+            config.write_text(
+                json.dumps({"skill_path": "/" + "nfs/example/team/SKILL.md"}) + "\n"
+            )
+            public_result = subprocess.run(
+                [sys.executable, str(PRIVACY_SCAN), str(root)], check=False
+            )
+            self.assertEqual(1, public_result.returncode)
+            team_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(PRIVACY_SCAN),
+                    "--policy",
+                    "team",
+                    str(root),
+                ],
+                check=False,
+            )
+            self.assertEqual(0, team_result.returncode)
+            config.write_text("secret=abcdefghijklmnop\n")  # privacy-scan: allow test fixture
+            secret_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(PRIVACY_SCAN),
+                    "--policy",
+                    "team",
+                    str(root),
+                ],
+                check=False,
+            )
+            self.assertEqual(1, secret_result.returncode)
 
 
 if __name__ == "__main__":

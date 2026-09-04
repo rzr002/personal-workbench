@@ -11,6 +11,10 @@
 - `allowed_session_ids`: exact session IDs eligible for distillation.
 - `allowed_session_roots`: informational approved roots; an ID is still required for candidate creation.
 
-`modules.json` is private and stores explicitly registered local module names, paths, descriptions, and triggers. The profile also contains pending and reviewed candidate directories, an append-only approved-knowledge file, an audit log, and a generated private entry Skill.
+`modules.json` is private and stores explicitly registered personal module names, paths, descriptions, and triggers.
+
+`teams.json` is private and stores attached team IDs, manifest paths, and owner-approved content digests. It does not copy team modules or grant filesystem access. A missing `teams.json` is treated as an empty registry for compatibility with older profiles.
+
+The profile also contains pending and reviewed candidate directories, an append-only approved-knowledge file, an audit log, and a generated private entry Skill.
 
 Do not add raw transcripts, access tokens, account claims, or copied environment dumps to this schema.
