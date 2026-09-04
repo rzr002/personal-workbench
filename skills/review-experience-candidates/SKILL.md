@@ -7,10 +7,11 @@ description: Review pending Personal Workbench learning candidates and record ex
 
 ## Review deliberately
 
-1. List pending candidates with `python3 <plugin-root>/scripts/workbench.py list-candidates`.
-2. Present the observation, proposed lesson, uncertainty, evidence summary, and validation idea separately. Do not hide weak evidence behind confident wording.
-3. Ask the profile owner for an explicit decision on each candidate: approve, revise, reject, or defer.
-4. For approve or reject, run:
+1. Run `workbench.py identity` and stop unless the role is `owner`.
+2. List pending candidates with `python3 <plugin-root>/scripts/workbench.py list-candidates`.
+3. Present the observation, proposed lesson, uncertainty, evidence summary, and validation idea separately. Do not hide weak evidence behind confident wording.
+4. Ask the profile owner for an explicit decision on each candidate: approve, revise, reject, or defer.
+5. For approve or reject, run:
 
 ```bash
 python3 <plugin-root>/scripts/workbench.py review-candidate \

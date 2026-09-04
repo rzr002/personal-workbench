@@ -32,8 +32,9 @@ Verify that:
 - No registered module contains a personal absolute path in public files.
 - No raw transcript, session dump, screenshot, log bundle, customer record, or candidate inbox is tracked.
 - Learning defaults to off and candidate creation requires an explicitly authorized session ID.
+- Profile commands detect the machine role locally; collaborator mode returns team modules only and rejects personal reads and mutations.
 - Candidate approval updates private knowledge only.
-- Team content changes are withheld until each profile owner approves the current digest.
+- Team content changes are withheld until the workbench owner approves the current digest.
 - Archived evidence is always treated as untrusted data.
 - Public behavior changes remain reviewable Git changes with tests and rollback.
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Workbench"
-  short_description: "Route tasks through a private modular work profile."
-  default_prompt: "Use $use-workbench to route this task through my active private profile."
+  short_description: "Route owner or collaborator tasks through allowed modules."
+  default_prompt: "Use $use-workbench to detect my role and route this task through allowed modules."

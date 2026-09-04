@@ -1,4 +1,4 @@
 interface:
   display_name: "Manage Team Workbench"
-  short_description: "Share internal skills without sharing personal memory"
-  default_prompt: "Set up or review my team workbench modules safely."
+  short_description: "Share owner-approved team skills without personal memory"
+  default_prompt: "Set up or review the owner-approved team workbench modules safely."

@@ -1,6 +1,6 @@
 {
   "name": "personal-workbench",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A privacy-first Codex workbench that separates public tooling, approved team capabilities, and personal learning.",
   "author": {
     "name": "Personal Workbench Contributors"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Personal Workbench",
     "shortDescription": "Build a private, reviewable work memory for Codex.",
-    "longDescription": "Route work through modular skills, share internal team capabilities by approved snapshot, keep each person's learning private, and promote lessons only after explicit review.",
+    "longDescription": "Route owner and collaborator machines by IP, share internal team capabilities by approved snapshot, keep owner learning private, and promote lessons only after explicit review.",
     "developerName": "Personal Workbench Contributors",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],

@@ -10,7 +10,7 @@ A team pack is an access-controlled directory outside the public Personal Workbe
 
 Module paths may be relative to `team.json` or absolute. Prefer relative paths when a Skill is stored in the same internal repository so the pack remains portable.
 
-Each personal profile stores team attachments in `teams.json`. An attachment records the manifest path and the exact approved content digest. The digest covers the manifest, every file beneath each registered Skill directory, and every explicitly declared external resource, excluding Git and cache metadata. When any covered content changes, that team's modules are withheld until the profile owner approves the new digest.
+Each owner's profile stores team attachments in `teams.json`. An attachment records the manifest path and the exact approved content digest. The digest covers the manifest, every file beneath each registered Skill directory, and every explicitly declared external resource, excluding Git and cache metadata. When any covered content changes, that team's modules are withheld until the workbench owner approves the new digest. Collaborators borrowing the workbench inherit the owner's approved team snapshot but cannot approve or change it.
 
 Declare external documents or support directories that materially define Skill behavior. The digest does not represent remote service state, database contents, files that were not declared, or authorization to access the underlying systems.
 

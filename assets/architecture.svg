@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-labelledby="title desc">
   <title id="title">Personal Workbench architecture</title>
-  <desc id="desc">A public plugin routes work through approved internal team capabilities while every person's learning remains in a private profile.</desc>
+  <desc id="desc">A source IP gate gives the owner personal and team capabilities while collaborators receive approved team capabilities only.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0b1020"/>
@@ -34,7 +34,7 @@
   <circle cx="90" cy="560" r="210" fill="#7c3aed" opacity="0.10"/>
 
   <text x="70" y="74" fill="#f8fafc" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="35" font-weight="700">Personal Workbench</text>
-  <text x="70" y="108" fill="#94a3b8" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17">Public core · approved team capabilities · private learning per person</text>
+  <text x="70" y="108" fill="#94a3b8" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17">Machine IP role gate · shared team capabilities · owner-only personal learning</text>
 
   <g filter="url(#shadow)">
     <rect x="65" y="165" width="300" height="330" rx="22" fill="#111827" stroke="#334155"/>
@@ -62,14 +62,14 @@
   <text x="480" y="353" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Repository or group access</text>
   <text x="480" y="385" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Content fingerprint</text>
   <rect x="480" y="423" width="225" height="42" rx="11" fill="#052e2b" stroke="#0f766e"/>
-  <text x="592" y="449" text-anchor="middle" fill="#a7f3d0" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" font-weight="600">Each person approves updates</text>
+  <text x="592" y="449" text-anchor="middle" fill="#a7f3d0" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" font-weight="600">Owner approves updates</text>
 
   <text x="865" y="215" fill="#c4b5fd" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" font-weight="700" letter-spacing="2">PRIVATE</text>
-  <text x="865" y="252" fill="#f8fafc" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="700">Your profile</text>
-  <text x="865" y="289" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Personal modules</text>
-  <text x="865" y="321" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Team approvals</text>
-  <text x="865" y="353" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Candidate inbox</text>
-  <text x="865" y="385" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Approved lessons</text>
+  <text x="865" y="252" fill="#f8fafc" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="700">Owner profile</text>
+  <text x="865" y="289" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Owner IP: personal + team</text>
+  <text x="865" y="321" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Other IP: team only</text>
+  <text x="865" y="353" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Owner-only approvals</text>
+  <text x="865" y="385" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16">Owner-only learning</text>
   <rect x="865" y="423" width="225" height="42" rx="11" fill="#2e1065" stroke="#6d28d9"/>
   <text x="977" y="449" text-anchor="middle" fill="#ddd6fe" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" font-weight="600">Never committed or shared</text>
 
@@ -78,6 +78,6 @@
 
   <rect x="264" y="528" width="672" height="40" rx="20" fill="#0f172a" stroke="#334155"/>
   <text x="600" y="553" text-anchor="middle" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="15">
-    Team modules execute shared work · learning always returns to the active private profile
+    Detected IP → owner gets all approved scopes · collaborator gets approved team scope only
   </text>
 </svg>

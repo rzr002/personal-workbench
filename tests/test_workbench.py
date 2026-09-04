@@ -158,6 +158,8 @@ class WorkbenchCliTest(unittest.TestCase):
             )
             self.run_cli(
                 "init-team",
+                "--root",
+                str(root),
                 "--name",
                 "Example team",
                 "--path",
@@ -174,6 +176,8 @@ class WorkbenchCliTest(unittest.TestCase):
             contract.write_text("Version one.\n")
             self.run_cli(
                 "add-team-module",
+                "--root",
+                str(root),
                 "--team",
                 str(team_root),
                 "--name",
@@ -273,6 +277,213 @@ class WorkbenchCliTest(unittest.TestCase):
             self.assertEqual(
                 "approval-required", changed_skill["blocked_teams"][0]["status"]
             )
+
+    def test_ip_role_hides_personal_state_and_blocks_owner_actions(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root = base / "private"
+            team_root = base / "shared-team"
+            personal_skill = base / "personal-skill"
+            personal_skill.mkdir()
+            (personal_skill / "SKILL.md").write_text(
+                "---\nname: personal-only\ndescription: Private behavior.\n---\n"
+            )
+
+            created = json.loads(
+                self.run_cli(
+                    "init-profile",
+                    "--name",
+                    "owner",
+                    "--root",
+                    str(root),
+                    "--activate",
+                ).stdout
+            )
+            self.assertEqual("owner", created["role"])
+            identity = json.loads(
+                self.run_cli("identity", "--root", str(root)).stdout
+            )
+            self.assertEqual("owner", identity["role"])
+
+            self.run_cli(
+                "add-module",
+                "--root",
+                str(root),
+                "--name",
+                "Personal only",
+                "--skill-path",
+                str(personal_skill),
+                "--description",
+                "Owner-only behavior",
+            )
+            self.run_cli(
+                "set-learning", "--root", str(root), "--mode", "candidate"
+            )
+            self.run_cli(
+                "init-team",
+                "--root",
+                str(root),
+                "--name",
+                "Borrowed team",
+                "--path",
+                str(team_root),
+            )
+            shared_skill = team_root / "skills" / "shared-ops"
+            shared_skill.mkdir(parents=True)
+            (shared_skill / "SKILL.md").write_text(
+                "---\nname: shared-ops\ndescription: Shared operations.\n---\n"
+            )
+            self.run_cli(
+                "add-team-module",
+                "--root",
+                str(root),
+                "--team",
+                str(team_root),
+                "--name",
+                "Shared ops",
+                "--skill-path",
+                str(shared_skill),
+                "--description",
+                "Team behavior",
+            )
+            self.run_cli(
+                "attach-team",
+                "--root",
+                str(root),
+                "--team",
+                str(team_root),
+            )
+
+            binding = json.loads(
+                self.run_cli(
+                    "bind-owner-ip",
+                    "--root",
+                    str(root),
+                    "--ip",
+                    "192.0.2.1",
+                    "--replace",
+                ).stdout
+            )
+            self.assertEqual("collaborator", binding["role"])
+
+            identity = json.loads(
+                self.run_cli("identity", "--root", str(root)).stdout
+            )
+            self.assertEqual("collaborator", identity["role"])
+            modules = json.loads(
+                self.run_cli("list-modules", "--root", str(root)).stdout
+            )
+            self.assertEqual("collaborator", modules["role"])
+            self.assertEqual(["shared-ops"], [item["name"] for item in modules["modules"]])
+            self.assertTrue(all(item["scope"] == "team" for item in modules["modules"]))
+
+            status = json.loads(self.run_cli("status", "--root", str(root)).stdout)
+            self.assertEqual("collaborator", status["role"])
+            self.assertEqual("off", status["learning_mode"])
+            for private_field in (
+                "profile_path",
+                "allowed_session_count",
+                "personal_module_count",
+                "pending_candidate_count",
+            ):
+                self.assertNotIn(private_field, status)
+
+            denied_commands = (
+                ("set-learning", "--mode", "off"),
+                ("authorize-session", "--session-id", "borrowed-session"),
+                (
+                    "add-module",
+                    "--name",
+                    "blocked-personal",
+                    "--skill-path",
+                    str(personal_skill),
+                    "--description",
+                    "blocked",
+                ),
+                (
+                    "init-team",
+                    "--name",
+                    "blocked-team",
+                    "--path",
+                    str(base / "blocked-team"),
+                ),
+                (
+                    "add-team-module",
+                    "--team",
+                    str(team_root),
+                    "--name",
+                    "blocked-module",
+                    "--skill-path",
+                    str(shared_skill),
+                    "--description",
+                    "blocked",
+                ),
+                ("attach-team", "--team", str(team_root)),
+                ("list-candidates",),
+                (
+                    "add-candidate",
+                    "--source-session",
+                    "borrowed-session",
+                    "--title",
+                    "blocked",
+                    "--lesson",
+                    "blocked",
+                ),
+                (
+                    "review-candidate",
+                    "--candidate",
+                    "missing",
+                    "--decision",
+                    "reject",
+                ),
+                ("detach-team", "--team", "borrowed-team"),
+                (
+                    "approve-team-update",
+                    "--team",
+                    "borrowed-team",
+                    "--digest",
+                    "0" * 64,
+                ),
+                ("bind-owner-ip",),
+            )
+            for command in denied_commands:
+                with self.subTest(command=command[0]):
+                    result = self.run_cli(
+                        command[0],
+                        "--root",
+                        str(root),
+                        *command[1:],
+                        expected=2,
+                    )
+                    self.assertIn("collaborator mode", result.stderr)
+
+    def test_legacy_profile_can_bind_owner_ip_once(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "private"
+            created = json.loads(
+                self.run_cli(
+                    "init-profile",
+                    "--name",
+                    "legacy",
+                    "--root",
+                    str(root),
+                    "--activate",
+                ).stdout
+            )
+            profile = Path(created["profile"])
+            data = json.loads((profile / "profile.json").read_text())
+            del data["owner_identity"]
+            (profile / "profile.json").write_text(json.dumps(data) + "\n")
+
+            before = json.loads(
+                self.run_cli("identity", "--root", str(root)).stdout
+            )
+            self.assertEqual("collaborator", before["role"])
+            self.assertFalse(before["owner_identity_configured"])
+            rebound = json.loads(
+                self.run_cli("bind-owner-ip", "--root", str(root)).stdout
+            )
+            self.assertEqual("owner", rebound["role"])
 
 
 class PrivacyScanTest(unittest.TestCase):
