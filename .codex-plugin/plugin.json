@@ -1,0 +1,22 @@
+{
+  "name": "personal-workbench",
+  "version": "0.1.0",
+  "description": "A privacy-first Codex workbench that routes reusable skills and turns explicitly authorized work evidence into reviewable learning candidates.",
+  "author": {
+    "name": "Personal Workbench Contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Personal Workbench",
+    "shortDescription": "Build a private, reviewable work memory for Codex.",
+    "longDescription": "Route work through modular skills, keep each person's profile outside the shared plugin, and promote lessons only after explicit review.",
+    "developerName": "Personal Workbench Contributors",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Set up my private work profile.",
+      "Route this task through my personal workbench.",
+      "Review my pending experience candidates."
+    ]
+  }
+}

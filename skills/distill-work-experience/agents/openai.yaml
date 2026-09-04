@@ -1,0 +1,4 @@
+interface:
+  display_name: "Distill Work Experience"
+  short_description: "Create reviewable lessons from authorized work evidence."
+  default_prompt: "Use $distill-work-experience to propose lessons from an authorized session."

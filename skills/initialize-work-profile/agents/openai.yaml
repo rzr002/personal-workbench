@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialize Work Profile"
+  short_description: "Create an isolated profile with learning off by default."
+  default_prompt: "Use $initialize-work-profile to create my isolated private work profile."

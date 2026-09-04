@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Experience Candidates"
+  short_description: "Approve or reject private learning candidates safely."
+  default_prompt: "Use $review-experience-candidates to review my pending private lessons."

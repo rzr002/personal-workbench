@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit Workbench Privacy"
+  short_description: "Check public files for privacy leaks before sharing."
+  default_prompt: "Use $audit-workbench-privacy to check this repository before sharing it."

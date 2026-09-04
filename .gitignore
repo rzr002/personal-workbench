@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.env
+.env.*
+*.local.json
+*.local.yaml
+*.local.yml
+.personal-workbench/
+.personal-workbench-private/
+profiles/
+sessions/
+candidates/
