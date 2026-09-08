@@ -1,15 +1,11 @@
-<p align="center">
-  <img src="./assets/architecture.svg" alt="Personal Workbench architecture" width="100%" />
-</p>
-
 <h1 align="center">Personal Workbench</h1>
 
 <p align="center">
-  A privacy-first Codex plugin for public tooling, approved team capabilities, and private personal learning.
+  One entry point for your Codex skills, with separate personal profiles and approved team modules.
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick start</a> ·
+  <a href="#quick-start">Set up your workbench</a> ·
   <a href="#privacy-model">Privacy model</a> ·
   <a href="#included-skills">Included skills</a> ·
   <a href="#中文说明">中文说明</a>
@@ -17,48 +13,25 @@
 
 ---
 
-Personal Workbench gives Codex one clear entry point for modular work skills. Each named workbench has one owner, identified by a bound machine IP. Generic tooling stays public, internal operational knowledge lives in access-controlled team packs, and the owner's work history and learning stay in a private profile. Coworkers may borrow the named workbench from other machines, but they receive team capabilities only.
+For Codex users with several local skills, repeated work routines, or internal team procedures. Personal Workbench routes each request to a relevant registered skill and keeps personal preferences, reviewed lessons, and approved team capabilities in separate stores.
 
-## Why this exists
+- **Find the right skill for a task:** register existing skills by reference and use one named entry point.
+- **Review what Codex learns:** authorized experience becomes a candidate for your approval; learning starts off.
+- **Control team module updates:** approve a specific team snapshot before it becomes available through the workbench.
 
-Useful work habits are usually scattered across prompts, local scripts, project notes, and chat history. Copying all of that into one large Skill creates three problems:
+Python **3.10+** · Six bundled skills · Local profile storage · Early release **0.3.0**
 
-- irrelevant instructions consume context;
-- personal or company details are easy to leak;
-- automatic self-editing makes behavior hard to review or roll back.
+Machine IP selects the owner or collaborator role. Filesystem and repository permissions must protect private data; see the [privacy model](#privacy-model) before sharing a deployment. [License status](#license).
 
-Personal Workbench keeps these concerns separate:
-
-| Layer | Contains | Shareable? |
-| --- | --- | --- |
-| Public plugin | Routing rules, profile tooling, review workflow, privacy checks | Yes |
-| Team pack | Internal Skills, paths, endpoints, schemas, and shared SOPs | Authorized team only |
-| Private profile | Personal modules, team approvals, preferences, candidates, approved lessons | Owner only |
-| Session evidence | Explicitly authorized local work records | Owner only |
-
-The role decision is deterministic:
-
-| Detected source IP | Effective role | Available scope | May change the workbench? |
-| --- | --- | --- | --- |
-| Bound owner IP | Owner | Public + approved team + personal | Yes, through explicit commands and review |
-| Any other IP | Collaborator | Public + approved team only | No |
-
-## Included skills
-
-| Skill | Purpose |
-| --- | --- |
-| [`use-workbench`](./skills/use-workbench/SKILL.md) | Route a request through the active profile and smallest relevant module |
-| [`initialize-work-profile`](./skills/initialize-work-profile/SKILL.md) | Create an isolated profile with learning disabled |
-| [`manage-team-workbench`](./skills/manage-team-workbench/SKILL.md) | Share internal modules and approve exact team snapshots |
-| [`distill-work-experience`](./skills/distill-work-experience/SKILL.md) | Turn authorized evidence into sanitized candidates |
-| [`review-experience-candidates`](./skills/review-experience-candidates/SKILL.md) | Approve, revise, reject, or defer proposed lessons |
-| [`audit-workbench-privacy`](./skills/audit-workbench-privacy/SKILL.md) | Check public files before committing or sharing |
-
-The repository itself is a Codex plugin. Additional domain-specific Skills stay where they already live and are referenced only by a private module registry.
+<p align="center">
+  <img src="./assets/architecture.svg" alt="Public skills, approved team packs, and a private personal profile" width="100%" />
+</p>
 
 ## Quick start
 
-Requirements: Python 3.10+ and Git.
+Requirements: Python 3.10+, Git, and a Codex environment with skills support. The shell commands below target macOS and Linux.
+
+### 1. Create your private profile
 
 ```bash
 git clone https://github.com/rzr002/personal-workbench.git
@@ -71,6 +44,35 @@ python3 scripts/workbench.py init-profile \
 ```
 
 The display name may contain underscores. The generated Codex Skill uses the normalized technical name `my-workbench`. Initialization binds the host's detected IPv4 address as the owner machine.
+
+### 2. Make the skills available to Codex
+
+`init-profile` creates a profile and its entry skill; it does not install skills into Codex. From the cloned repository directory, link the six bundled skills and your generated entry skill into your personal skills directory:
+
+```bash
+mkdir -p "$HOME/.agents/skills"
+for skill in "$PWD"/skills/* \
+  "$HOME/.personal-workbench/profiles/my-workbench/skills/my-workbench"; do
+  target="$HOME/.agents/skills/$(basename "$skill")"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    printf 'Already exists; inspect before replacing: %s\n' "$target"
+  else
+    ln -s "$skill" "$target"
+  fi
+done
+```
+
+Existing paths are left untouched. Keep the cloned repository and private profile in place: the links point to them. If you chose a different name or `--root`, adjust the private entry path accordingly. Keep the private entry skill out of public repositories.
+
+### 3. Open a new Codex task
+
+```text
+Use $my-workbench to show my available modules and whether learning is enabled.
+```
+
+For a fresh profile, expect owner mode, learning off, and an empty module list. Next, [connect a personal skill](#connect-a-personal-skill) you already use. Your prompt should name the generated technical skill name if you chose a different profile name.
+
+### Check or update your profile
 
 Check the active profile:
 
@@ -113,6 +115,43 @@ python3 scripts/workbench.py add-module \
 ```
 
 The public plugin does not copy or publish that Skill. Use a team pack instead when every authorized coworker should receive the capability.
+
+## Why this exists
+
+Useful work habits are usually scattered across prompts, local scripts, project notes, and chat history. Copying all of that into one large Skill creates three problems:
+
+- irrelevant instructions consume context;
+- personal or company details are easy to leak;
+- automatic self-editing makes behavior hard to review or roll back.
+
+Personal Workbench keeps these concerns separate:
+
+| Layer | Contains | Shareable? |
+| --- | --- | --- |
+| Public plugin | Routing rules, profile tooling, review workflow, privacy checks | Yes |
+| Team pack | Internal Skills, paths, endpoints, schemas, and shared SOPs | Authorized team only |
+| Private profile | Personal modules, team approvals, preferences, candidates, approved lessons | Owner only |
+| Session evidence | Explicitly authorized local work records | Owner only |
+
+The role decision is deterministic:
+
+| Detected source IP | Effective role | Available scope | May change the workbench? |
+| --- | --- | --- | --- |
+| Bound owner IP | Owner | Public + approved team + personal | Yes, through explicit commands and review |
+| Any other IP | Collaborator | Public + approved team only | No |
+
+## Included skills
+
+| Skill | Purpose |
+| --- | --- |
+| [`use-workbench`](./skills/use-workbench/SKILL.md) | Route a request through the active profile and smallest relevant module |
+| [`initialize-work-profile`](./skills/initialize-work-profile/SKILL.md) | Create an isolated profile with learning disabled |
+| [`manage-team-workbench`](./skills/manage-team-workbench/SKILL.md) | Share internal modules and approve exact team snapshots |
+| [`distill-work-experience`](./skills/distill-work-experience/SKILL.md) | Turn authorized evidence into sanitized candidates |
+| [`review-experience-candidates`](./skills/review-experience-candidates/SKILL.md) | Approve, revise, reject, or defer proposed lessons |
+| [`audit-workbench-privacy`](./skills/audit-workbench-privacy/SKILL.md) | Check public files before committing or sharing |
+
+The repository itself is a Codex plugin. Additional domain-specific Skills stay where they already live and are referenced only by a private module registry.
 
 ## Share internal team capabilities
 
@@ -266,9 +305,22 @@ This is an early privacy-first foundation. The current release provides IP-based
 
 No open-source license has been selected yet. The source is public for inspection, but reuse terms should be chosen deliberately before broader distribution.
 
+## Feedback and related projects
+
+[Suggest an improvement or report a setup problem](https://github.com/rzr002/personal-workbench/issues) with the step you tried and the behavior you expected. Use synthetic examples and remove private paths and work records before posting; see [SECURITY.md](SECURITY.md).
+
+- [Reflect Workday](https://github.com/rzr002/reflect-workday): recall a workday or week from short Codex and Git evidence.
+- [WorkSkill](https://github.com/rzr002/workskill): preserve work methods in a wiki and propose reusable skills.
+
+These projects work independently. Registering a skill here does not automatically import its reports, wiki, or personal data.
+
 ## 中文说明
 
-Personal Workbench 是一个面向 Codex 的“个人工作台”：每个命名工作台只有一个所有者；对外分享干净的通用插件；团队内部路径、服务地址、数据协议和共享 Skill 放在受权限保护的团队包；所有者自己的偏好、工作记录、候选经验和已确认经验保存在私人 Profile。
+**给已有的 Codex Skills 一个统一入口，把个人偏好和团队能力分开管理。**
+
+适合已经积累了多个 Skill、常用工作流程或内部团队 SOP 的 Codex 用户。Personal Workbench 按任务选择已登记的 Skill；个人经验先进入候选区，由本人审核；团队能力按已批准的内容版本加载。
+
+只想回顾一天做过什么，可以先用 [Reflect Workday](https://github.com/rzr002/reflect-workday)；想从工作记录提炼方法，可以看 [WorkSkill](https://github.com/rzr002/workskill)。这几个项目可以独立使用。
 
 核心原则很简单：
 
@@ -283,14 +335,24 @@ Personal Workbench 是一个面向 Codex 的“个人工作台”：每个命名
 - 同事借用你的工作台时不能查看个人模块，也不能读取或写入学习记录；
 - 对外发布前必须通过隐私扫描、测试和 Git diff 检查。
 
-第一次使用：
+第一次使用需要 Python 3.10+、Git 和支持 Skills 的 Codex。以下命令适用于 macOS / Linux：
 
 ```bash
+git clone https://github.com/rzr002/personal-workbench.git
+cd personal-workbench
 python3 scripts/workbench.py init-profile \
   --name my_workbench \
   --root ~/.personal-workbench \
   --activate
 ```
+
+这一步创建私人配置和入口 Skill，**还没有把 Skill 安装到 Codex**。继续执行上方[第二步：链接 Skills](#2-make-the-skills-available-to-codex)的命令，将六个公共 Skill 和生成的私人入口链接到个人 Skills 目录。然后打开一个新的 Codex 任务：
+
+```text
+使用 $my-workbench，告诉我有哪些可用模块，以及当前是否开启学习。
+```
+
+新配置应显示所有者模式、学习关闭、模块列表为空。接下来按 [Connect a personal skill](#connect-a-personal-skill) 登记你已有的 Skill，即可通过工作台调用。私人入口包含配置路径，应留在个人目录中。
 
 标注平台路径、内部接口和团队 SOP 不应该进入公开仓库，也不应该只放在个人区；它们应进入团队包。所有者挂载并批准团队包后，同事从其他 IP 借用这个工作台时就可以使用这些团队能力，但不能修改团队挂载或审批状态。
 
